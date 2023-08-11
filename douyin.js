@@ -29,3 +29,4 @@ return res
   return e
   }
 }
+// douyin('https://v.douyin.com/iJAgnX8D/') Contoh pemanggil function
