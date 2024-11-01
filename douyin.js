@@ -1,32 +1,32 @@
 const axios = require('axios')
+const FormData = require('form-data')
 const cheerio = require('cheerio')
 async function douyin(url) {
   try {
-  const getToken = (await axios.get('https://snaptikapp.me/download-douyin-video/')).data
-  const $ = cheerio.load(getToken)
-  const token = $('#token').attr('value')
-  const { data } = await axios.post('https://snaptikapp.me/wp-json/aio-dl/video-data/',{
-    url: url,
-    token
-  },{
-    headers:{
-      'Content-Type':"application/x-www-form-urlencoded"
-    }
-  })
-  const mp4_Hd = data.medias.filter(i => i.quality === 'hd')[0]
-  const mp4_Sd = data.medias.filter(i => i.quality === 'sd')[0]
-  const watermark = data.medias.filter(i => i.quality === 'watermark')[0]
-  const mp3 = data.medias.filter(i => i.extension === 'mp3')[0]
-  const res = {
-    title: data.title,
-    duration: data.duration,
-    mp4: mp4_Hd ? mp4_Hd : mp4_Sd,
-    mp4_watermark: watermark ? watermark : 'yahh link tidak ditemukan',
-    mp3:mp3.url,
-  }
-return res
+    const form = new FormData()
+    form.append('q', url)
+    form.append('lang', 'en')
+    const { data } = await axios.post('https://lovetik.app/api/ajaxSearch', form, {
+      headers: {
+        'Content-Type': "application/x-www-form-urlencoded; charset=UTF-8"
+      }
+    })
+    const $ = cheerio.load(data.data);
+
+    // Find all <a> tags and extract href attributes
+    const result = [];
+    $('a').each((index, element) => {
+      const href = $(element).attr('href');
+      const type = $(element).text().trim()
+      if (href) {
+        if (!href.includes("https")) return
+        result.push({ type, href });
+      }
+    });
+    return result
   } catch (e) {
-  return e
+    console.log(e.message)
+    return e
   }
 }
-// douyin('https://v.douyin.com/iJAgnX8D/') Contoh pemanggil function
+// douyin('https://v.douyin.com/iJAgnX8D/') //Contoh pemanggil function
